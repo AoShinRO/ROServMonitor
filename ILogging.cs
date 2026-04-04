@@ -30,11 +30,11 @@ namespace AoShinhoServ_Monitor
         public static Thickness BuildROBMargin { set; get; }
         public static Thickness OptionSaveMargin { set; get; }
         public static Thickness OptionCancelMargin { set; get; }
-        public static rAthena.Data LastErrorLog { set; get; }
+        public static ROServers.Data LastErrorLog { set; get; }
 
-        public static List<rAthena.ProcessesInfo> processesInfos = new List<rAthena.ProcessesInfo>();
+        public static List<ROServers.ProcessesInfo> processesInfos = new List<ROServers.ProcessesInfo>();
 
-        public static readonly List<rAthena.Error> errorLogs = new List<rAthena.Error>();
+        public static readonly List<ROServers.Error> errorLogs = new List<ROServers.Error>();
 
         public static OptionsWnd OptWin = new OptionsWnd();
 
@@ -42,9 +42,9 @@ namespace AoShinhoServ_Monitor
 
         #region LogWinRelated
 
-        public static void Add_ErrorLog(rAthena.Data Data)
+        public static void Add_ErrorLog(ROServers.Data Data)
         {
-            errorLogs.Add(new rAthena.Error { Header = Data.Header, Body = Data.Body });
+            errorLogs.Add(new ROServers.Error { Header = Data.Header, Body = Data.Body });
             Task.Run(() => UpdateContextMenu());
         }
 

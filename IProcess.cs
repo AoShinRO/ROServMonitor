@@ -12,15 +12,15 @@ namespace AoShinhoServ_Monitor
     public class IProcess
     {
 
-        public static bool KillAll(int ProcessId, rAthena.Type type)
+        public static bool KillAll(int ProcessId, ROServers.Type type)
         {
             try
             {
                 switch (type)
                 {
-                    case rAthena.Type.WSproxy:
-                    case rAthena.Type.DevConsole:
-                    case rAthena.Type.ROBrowser:
+                    case ROServers.Type.WSproxy:
+                    case ROServers.Type.DevConsole:
+                    case ROServers.Type.ROBrowser:
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "taskkill",
@@ -54,9 +54,9 @@ namespace AoShinhoServ_Monitor
                 {
                     switch (it.type)
                     {
-                        case rAthena.Type.WSproxy:
-                        case rAthena.Type.DevConsole:
-                        case rAthena.Type.ROBrowser:
+                        case ROServers.Type.WSproxy:
+                        case ROServers.Type.DevConsole:
+                        case ROServers.Type.ROBrowser:
                             break;
                         default:
                             ILogging.processesInfos.Remove(it);
@@ -66,6 +66,39 @@ namespace AoShinhoServ_Monitor
                 }
             });
             return true;
+        }
+
+        public static void SaveTrackedPIDs()
+        {
+            var pids = string.Join(",", ILogging.processesInfos.Select(p => $"{p.pID}:{p.type}"));
+            Properties.Settings.Default.TrackedPIDs = pids;
+            Properties.Settings.Default.Save(); 
+        }
+
+        public static void KillOrphanProcesses()
+        {
+            string tracked = Properties.Settings.Default.TrackedPIDs;
+            if (string.IsNullOrEmpty(tracked)) return;
+
+            foreach (var entry in tracked.Split(','))
+            {
+                var parts = entry.Split(':');
+                if (parts.Length == 2
+                    && int.TryParse(parts[0], out int pid)
+                    && Enum.TryParse(parts[1], out ROServers.Type type))
+                {
+                    try
+                    {
+                        var p = Process.GetProcessById(pid);
+                        if (!p.HasExited)
+                            KillAll(pid, type);
+                    }
+                    catch { }
+                }
+            }
+
+            Properties.Settings.Default.TrackedPIDs = "";
+            Properties.Settings.Default.Save();
         }
 
         public static string GetFileName(string FilePath) => System.IO.Path.GetFileNameWithoutExtension(FilePath);
@@ -98,30 +131,30 @@ namespace AoShinhoServ_Monitor
 
         #endregion ValidatePathConfig
 
-        public static rAthena.Type GetProcessType(Process rAthenaProcess)
+        public static ROServers.Type GetProcessType(Process ROProcess)
         {
-            rAthena.Type type = rAthena.Type.DevConsole;
+            ROServers.Type type = ROServers.Type.DevConsole;
             Parallel.ForEach(ILogging.processesInfos, it =>
             {
-                if (it.pID == rAthenaProcess.Id)
+                if (it.pID == ROProcess.Id)
                     type = it.type;
             });
 
-            if (type != rAthena.Type.DevConsole)
+            if (type != ROServers.Type.DevConsole)
                 return type;
 
-            switch (rAthenaProcess.ProcessName.ToLowerInvariant())
+            switch (ROProcess.ProcessName.ToLowerInvariant())
             {
                 case var n when n == GetFileName(Configuration.LoginPath).ToLowerInvariant():
-                    return rAthena.Type.Login;
+                    return ROServers.Type.Login;
                 case var n when n == GetFileName(Configuration.CharPath).ToLowerInvariant():
-                    return rAthena.Type.Char;
+                    return ROServers.Type.Char;
                 case var n when n == GetFileName(Configuration.WebPath).ToLowerInvariant():
-                    return rAthena.Type.Web;
+                    return ROServers.Type.Web;
                 case var n when n == GetFileName(Configuration.MapPath).ToLowerInvariant():
-                    return rAthena.Type.Map;
+                    return ROServers.Type.Map;
                 default:
-                    return rAthena.Type.DevConsole;
+                    return ROServers.Type.DevConsole;
             }
         }
     }

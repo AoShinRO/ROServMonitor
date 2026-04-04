@@ -23,6 +23,7 @@ namespace AoShinhoServ_Monitor
         public MainWindow()
         {
             InitializeComponent();
+            IProcess.KillOrphanProcesses();
             InitializeSubWinComponent();
             InitializeNotifyIcon();
             AdjustLayout();
@@ -198,10 +199,11 @@ namespace AoShinhoServ_Monitor
                     process.Start();
                     process.BeginErrorReadLine();
                     process.BeginOutputReadLine();
-                    rAthena.ProcessesInfo info = new rAthena.ProcessesInfo();
+                    ROServers.ProcessesInfo info = new ROServers.ProcessesInfo();
                     info.pID = process.Id;
                     info.type = IProcess.GetProcessType(process);
                     ILogging.processesInfos.Add(info);
+                    IProcess.SaveTrackedPIDs();
                 }
                 catch (Exception ex)
                 {
@@ -223,33 +225,33 @@ namespace AoShinhoServ_Monitor
                         path += cmd.Substring(0, cmd.LastIndexOf('\\'));
 
                     string projectname = path;
-                    rAthena.ProcessesInfo info = new rAthena.ProcessesInfo();
+                    ROServers.ProcessesInfo info = new ROServers.ProcessesInfo();
 
                     #region comandline
                     switch (alias)
                     {
                         case "build":
-                            cmd = @"npm run build -- -O -T";
+                            cmd = @"npm run build -- -O";
                             if (!Properties.Settings.Default.ROBH)
                                 cmd += " -H";
                             path = cmdPath;
-                            info.type = rAthena.Type.ROBrowser;
+                            info.type = ROServers.Type.ROBrowser;
 
                             break;
                         case "robrowser":
                             if (Properties.Settings.Default.DevMode)
-                                cmd = @"npm run serve";
-                            else
                                 cmd = @"npm run live";
+                            else
+                                cmd = @"npm run serve";
                             path = cmdPath;
-                            info.type = rAthena.Type.ROBrowser;
+                            info.type = ROServers.Type.ROBrowser;
                             break;
                         case "wsproxy":
                             if (Properties.Settings.Default.wsport > 0)
                                 cmd = $"wsproxy -p {Properties.Settings.Default.wsport}";
                             else
                                 cmd = $"wsproxy";
-                            info.type = rAthena.Type.WSproxy;
+                            info.type = ROServers.Type.WSproxy;
                             break;
                         default:
                             if (!IProcess.CheckMissingFile(projectname + "/rAthena.sln", "rAthena.sln"))
@@ -282,7 +284,7 @@ namespace AoShinhoServ_Monitor
                                 buildProcess.Start();
                                 buildProcess.BeginErrorReadLine();
                                 buildProcess.BeginOutputReadLine();
-                                info.type = rAthena.Type.DevConsole;
+                                info.type = ROServers.Type.DevConsole;
                                 info.pID = buildProcess.Id;
                                 ILogging.processesInfos.Add(info);
                                 return;
@@ -290,16 +292,16 @@ namespace AoShinhoServ_Monitor
                             else
                             {
                                 if (Properties.Settings.Default.PreRenewal)
-                                    cmd = $@"msbuild {projectname} -t:build -property:Configuration=Release /p:DefineConstants=""PRERE""";
+                                    cmd = $@"msbuild {projectname} -t:rebuild -property:Configuration=Release /p:DefineConstants=""PRERE""";
                                 else
-                                    cmd = $@"msbuild {projectname} -t:build -property:Configuration=Release";
+                                    cmd = $@"msbuild {projectname} -t:rebuild -property:Configuration=Release";
 
                                 if (projectname == "brHades.sln")
                                     cmd += @" /p:CppLanguageStandard=stdcpp20";
 
                                 cmd += " /warnaserror";
                             }
-                            info.type = rAthena.Type.DevConsole;
+                            info.type = ROServers.Type.DevConsole;
                             break;
 
                     }
@@ -357,16 +359,16 @@ namespace AoShinhoServ_Monitor
             process.ErrorDataReceived += new DataReceivedEventHandler(Proc_DataReceived);
             process.OutputDataReceived += new DataReceivedEventHandler(Proc_DataReceived);
             process.Exited += new EventHandler(Proc_HasExited);
-            rAthena.ProcessesInfo info = new rAthena.ProcessesInfo();
+            ROServers.ProcessesInfo info = new ROServers.ProcessesInfo();
             info.pID = process.Id;
-            info.type = rAthena.Type.DevConsole;
+            info.type = ROServers.Type.DevConsole;
             ILogging.processesInfos.Add(info);
             return process;
         }
 
-        private static rAthena.Data ParseServerData(string rawData)
+        private static ROServers.Data ParseServerData(string rawData)
         {
-            var data = new rAthena.Data();
+            var data = new ROServers.Data();
             rawData = IText.RemoveAnsi(rawData);
             int endIndex = rawData.IndexOf("]");
 
@@ -411,25 +413,25 @@ namespace AoShinhoServ_Monitor
             switch (IProcess.GetProcessType((Process)sender))
             {
 
-                case rAthena.Type.Login:
+                case ROServers.Type.Login:
                     Proc_Data2Box(LoginBox, Data);
                     break;
 
-                case rAthena.Type.Char:
+                case ROServers.Type.Char:
                     Proc_Data2Box(CharBox, Data);
                     break;
 
-                case rAthena.Type.Web:
+                case ROServers.Type.Web:
                     Proc_Data2Box(WebBox, Data);
                     break;
 
-                case rAthena.Type.DevConsole:
+                case ROServers.Type.DevConsole:
                     Proc_Data2Box(DevBox, Data);
                     break;
-                case rAthena.Type.ROBrowser:
+                case ROServers.Type.ROBrowser:
                     Proc_Data2Box(NpmBox, Data);
                     break;
-                case rAthena.Type.WSproxy:
+                case ROServers.Type.WSproxy:
                     Proc_Data2Box(WSBox, Data);
                     break;
                 default:
@@ -440,7 +442,7 @@ namespace AoShinhoServ_Monitor
             #endregion SwitchProcess
         }
 
-        public void Proc_Data2Box(System.Windows.Controls.RichTextBox ThisBox, rAthena.Data Data)
+        public void Proc_Data2Box(System.Windows.Controls.RichTextBox ThisBox, ROServers.Data Data)
         {
             Application.Current.Dispatcher?.BeginInvoke(
                 DispatcherPriority.Background,
@@ -491,27 +493,27 @@ namespace AoShinhoServ_Monitor
             Application.Current.Dispatcher?.InvokeAsync(() =>
             {
                 Process p = (Process)sender;
-                rAthena.Type type = IProcess.GetProcessType(p);
+                ROServers.Type type = IProcess.GetProcessType(p);
                 switch (type)
                 {
-                    case rAthena.Type.Map:
+                    case ROServers.Type.Map:
                         MapBox.AppendText(Environment.NewLine + ">>Map Server - stopped<<");
                         break;
-                    case rAthena.Type.Login:
+                    case ROServers.Type.Login:
                         LoginBox.AppendText(Environment.NewLine + ">>Login Server - stopped<<");
                         break;
 
-                    case rAthena.Type.Char:
+                    case ROServers.Type.Char:
                         CharBox.AppendText(Environment.NewLine + ">>Char Server - stopped<<");
                         break;
 
-                    case rAthena.Type.Web:
+                    case ROServers.Type.Web:
                         WebBox.AppendText(Environment.NewLine + ">>Web Server - stopped<<");
                         break;
-                    case rAthena.Type.WSproxy:
+                    case ROServers.Type.WSproxy:
                         WSBox.AppendText(Environment.NewLine + ">>wsProxy - stopped<<");
                         break;
-                    case rAthena.Type.ROBrowser:
+                    case ROServers.Type.ROBrowser:
                         NpmBox.AppendText(Environment.NewLine + ">>ROBrowser - stopped<<");
                         break;
                     default:
@@ -619,7 +621,7 @@ namespace AoShinhoServ_Monitor
             {
                 Icon = Properties.Resources.Main_Icon,
                 Visible = true,
-                Text = "rAthena Server Monitor by AoShinHo."
+                Text = "RO Server Monitor by AoShinHo."
             };
 
             ILogging._notifyIcon.MouseDoubleClick += (sender, e) =>
@@ -862,7 +864,7 @@ namespace AoShinhoServ_Monitor
             NpmBox.Document.Blocks.Clear();
             Parallel.ForEach(ILogging.processesInfos, p =>
             {
-                if (p.type == rAthena.Type.ROBrowser)
+                if (p.type == ROServers.Type.ROBrowser)
                     IProcess.KillAll(p.pID, p.type);
             });
 
@@ -873,7 +875,7 @@ namespace AoShinhoServ_Monitor
             NpmBox.Document.Blocks.Clear();
             Parallel.ForEach(ILogging.processesInfos, p =>
             {
-                if (p.type == rAthena.Type.ROBrowser)
+                if (p.type == ROServers.Type.ROBrowser)
                     IProcess.KillAll(p.pID, p.type);
             });
             await Task.Run(() => RunWithRedirectCmdAsync(Configuration.RobPath, "robrowser"));
@@ -884,7 +886,7 @@ namespace AoShinhoServ_Monitor
             WSBox.Document.Blocks.Clear();
             Parallel.ForEach(ILogging.processesInfos, p =>
             {
-                if (p.type == rAthena.Type.WSproxy)
+                if (p.type == ROServers.Type.WSproxy)
                     IProcess.KillAll(p.pID, p.type);
             });
             await Task.Run(() => RunWithRedirectCmdAsync("", "wsproxy"));

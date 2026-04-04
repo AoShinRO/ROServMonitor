@@ -2,7 +2,7 @@
 
 namespace AoShinhoServ_Monitor
 {
-    public class rAthena
+    public class ROServers
     {
         public enum Type
         {

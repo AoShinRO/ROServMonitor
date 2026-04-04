@@ -19,7 +19,7 @@ namespace AoShinhoServ_Monitor
             return typeRun;
         }
 
-        public static Paragraph AppendColoredText(rAthena.Data Data)
+        public static Paragraph AppendColoredText(ROServers.Data Data)
         {
             Paragraph paragraph = new Paragraph();
             paragraph.Inlines.Add(RunColoredText(Data.Header, Data.Paint));
@@ -27,7 +27,7 @@ namespace AoShinhoServ_Monitor
             return paragraph;
         }
 
-        public static Brush GetMessageTypeColor(rAthena.Data Data)
+        public static Brush GetMessageTypeColor(ROServers.Data Data)
         {
             switch (Data.Header)
             {
@@ -64,7 +64,7 @@ namespace AoShinhoServ_Monitor
         {
             Brush color = GetWhiteModeColor();
 
-            rAthena.Data Data = new rAthena.Data
+            ROServers.Data Data = new ROServers.Data
             {
                 Header = "[Info]: ",
                 Paint = color,
@@ -91,7 +91,7 @@ namespace AoShinhoServ_Monitor
             Starting_Message_sub(wsproxy, Data);
         }
 
-        private static void Starting_Message_sub(System.Windows.Controls.RichTextBox Box, rAthena.Data Data) => Box.Document.Blocks.Add(AppendColoredText(Data));
+        private static void Starting_Message_sub(System.Windows.Controls.RichTextBox Box, ROServers.Data Data) => Box.Document.Blocks.Add(AppendColoredText(Data));
 
     }
 }

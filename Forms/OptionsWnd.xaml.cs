@@ -20,10 +20,10 @@ namespace AoShinhoServ_Monitor.Forms
 
         #region Btn_Related
 
-        public string OpenPathDialogBox(rAthena.Type type)
+        public string OpenPathDialogBox(ROServers.Type type)
         {
             
-            if (type == rAthena.Type.ROBrowser)
+            if (type == ROServers.Type.ROBrowser)
             {
                 using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
                 {
@@ -40,15 +40,15 @@ namespace AoShinhoServ_Monitor.Forms
             OpenFileDialog box;
             switch (type)
             {
-                case rAthena.Type.Login:
+                case ROServers.Type.Login:
                     box = new OpenFileDialog { Filter = @"login-server (*.exe)|*.exe|All files (*.*)|*.*" };
                     break;
 
-                case rAthena.Type.Char:
+                case ROServers.Type.Char:
                     box = new OpenFileDialog { Filter = @"char-server (*.exe)|*.exe|All files (*.*)|*.*" };
                     break;
 
-                case rAthena.Type.Web:
+                case ROServers.Type.Web:
                     box = new OpenFileDialog { Filter = @"web-server (*.exe)|*.exe|All files (*.*)|*.*" };
                     break;
 
@@ -63,9 +63,9 @@ namespace AoShinhoServ_Monitor.Forms
 
             switch (type)
             {
-                case rAthena.Type.Login: return Configuration.LoginPath;
-                case rAthena.Type.Char: return Configuration.CharPath;
-                case rAthena.Type.Web: return Configuration.WebPath;
+                case ROServers.Type.Login: return Configuration.LoginPath;
+                case ROServers.Type.Char: return Configuration.CharPath;
+                case ROServers.Type.Web: return Configuration.WebPath;
                 default: return Configuration.MapPath;
             }
         }
@@ -85,33 +85,33 @@ namespace AoShinhoServ_Monitor.Forms
         {
         }
 
-        private void MapExePath_Click(object sender, RoutedEventArgs e) => SaverAthenaFilePath(MapPath, rAthena.Type.Map);
+        private void MapExePath_Click(object sender, RoutedEventArgs e) => SaveServerFilePath(MapPath, ROServers.Type.Map);
 
-        private void WebExePath_Click(object sender, RoutedEventArgs e) => SaverAthenaFilePath(WebPath, rAthena.Type.Web);
+        private void WebExePath_Click(object sender, RoutedEventArgs e) => SaveServerFilePath(WebPath, ROServers.Type.Web);
 
-        private void LoginExePath_Click(object sender, RoutedEventArgs e) => SaverAthenaFilePath(LoginPath, rAthena.Type.Login);
+        private void LoginExePath_Click(object sender, RoutedEventArgs e) => SaveServerFilePath(LoginPath, ROServers.Type.Login);
 
-        private void CharExePath_Click(object sender, RoutedEventArgs e) => SaverAthenaFilePath(CharPath, rAthena.Type.Char);
+        private void CharExePath_Click(object sender, RoutedEventArgs e) => SaveServerFilePath(CharPath, ROServers.Type.Char);
 
-        private void ROBExePath_Click(object sender, RoutedEventArgs e) => SaverAthenaFilePath(ROBPath, rAthena.Type.ROBrowser);
+        private void ROBExePath_Click(object sender, RoutedEventArgs e) => SaveServerFilePath(ROBPath, ROServers.Type.ROBrowser);
 
-        private void SaverAthenaFilePath(TextBox Box,rAthena.Type Types)
+        private void SaveServerFilePath(TextBox Box,ROServers.Type Types)
         {
             Box.Text = OpenPathDialogBox(Types);
             switch (Types)
             {
-                case rAthena.Type.Login:
+                case ROServers.Type.Login:
                     Configuration.LoginPath = Box.Text;
                     break;
 
-                case rAthena.Type.Char:
+                case ROServers.Type.Char:
                     Configuration.CharPath = Box.Text;
                     break;
 
-                case rAthena.Type.Web:
+                case ROServers.Type.Web:
                     Configuration.WebPath = Box.Text;
                     break;
-                case rAthena.Type.ROBrowser:
+                case ROServers.Type.ROBrowser:
                     Configuration.RobPath = Box.Text;
                     break;
                 default:
