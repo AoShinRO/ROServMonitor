@@ -68,11 +68,16 @@ namespace AoShinhoServ_Monitor
             return true;
         }
 
+        private static readonly object _trackLock = new object();
+
         public static void SaveTrackedPIDs()
         {
-            var pids = string.Join(",", ILogging.processesInfos.Select(p => $"{p.pID}:{p.type}"));
-            Properties.Settings.Default.TrackedPIDs = pids;
-            Properties.Settings.Default.Save(); 
+            lock (_trackLock)
+            {
+                var pids = string.Join(",", ILogging.processesInfos.ToArray().Select(p => $"{p.pID}:{p.type}"));
+                Properties.Settings.Default.TrackedPIDs = pids;
+                Properties.Settings.Default.Save();
+            }
         }
 
         public static void KillOrphanProcesses()

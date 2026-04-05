@@ -167,6 +167,7 @@ namespace AoShinhoServ_Monitor
             };
 
             await Task.WhenAll(tasks);
+            IProcess.SaveTrackedPIDs();
             return true;
         }
 
