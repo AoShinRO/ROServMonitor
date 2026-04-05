@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -329,6 +329,7 @@ namespace AoShinhoServ_Monitor
                     process.BeginOutputReadLine();
                     info.pID = process.Id;
                     ILogging.processesInfos.Add(info);
+                    IProcess.SaveTrackedPIDs();
                 }
                 catch (Exception ex)
                 {
@@ -760,6 +761,7 @@ namespace AoShinhoServ_Monitor
                 RestartGrid.Visibility = Visibility.Collapsed;
                 Do_Clear_All();
             }
+            IProcess.SaveTrackedPIDs();
         }
 
         private void ShowLogsBtn_Click(object sender, RoutedEventArgs e)
@@ -791,6 +793,7 @@ namespace AoShinhoServ_Monitor
         private void Do_End()
         {
             IProcess.Do_Kill_All();
+            IProcess.SaveTrackedPIDs();
             Configuration.Save();
             ILogging.LogWin.Close();
             ILogging.OptWin.Close();
