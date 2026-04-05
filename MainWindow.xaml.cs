@@ -204,7 +204,6 @@ namespace AoShinhoServ_Monitor
                     info.pID = process.Id;
                     info.type = IProcess.GetProcessType(process);
                     ILogging.processesInfos.Add(info);
-                    IProcess.SaveTrackedPIDs();
                 }
                 catch (Exception ex)
                 {
