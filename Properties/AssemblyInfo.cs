@@ -7,8 +7,8 @@ using System.Windows;
 // As informações gerais sobre um assembly são controladas por
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associada a um assembly.
-[assembly: AssemblyTitle("Serv-Monitor")]
-[assembly: AssemblyDescription("Server Monitoring Framework By AoShinHo")]
+[assembly: AssemblyTitle("ROServ-Monitor")]
+[assembly: AssemblyDescription("ROServer Monitoring Framework By AoShinHo")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("AoShinHo")]
 [assembly: AssemblyProduct("AoShinhoServ-Monitor")]
@@ -51,5 +51,5 @@ using System.Windows;
 // É possível especificar todos os valores ou usar como padrão os Números de Build e da Revisão
 // usando o "*" como mostrado abaixo:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.5.0")]
-[assembly: AssemblyFileVersion("1.0.5.0")]
+[assembly: AssemblyVersion("1.0.6.0")]
+[assembly: AssemblyFileVersion("1.0.6.0")]
